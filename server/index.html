@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      if (document.cookie.indexOf("userId") === -1) {
+        const userId = prompt("Enter user id: ");
+        document.cookie = document.cookie + `userId=${userId}; path=/`;
+      }
+      const socket = io();
+
+      socket.on("connect", () => {
+        socket.emit("getLeftOverMessages", "");
+      });
+
+      socket.on("message", (message, ackCb) => {
+        console.log(message);
+        ackCb();
+      });
+
+      function Emit(message) {
+        socket.emit("message", message);
+      }
+    </script>
+  </body>
+</html>
