@@ -61,7 +61,8 @@ class SocketServer {
             if (cb) cb(userId, res);
           })
           .catch((err) => {
-            notSent.push(userId);
+            // notSent.push(userId);
+            this.storeInPresistor([userId], message);
             console.log("ack error : ", err);
           });
       } else notSent.push(userId);

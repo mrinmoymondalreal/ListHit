@@ -1,3 +1,5 @@
+import { useUser } from '@clerk/clerk-expo';
+import { useAuth } from '@clerk/clerk-react';
 import mitt from 'mitt'
 
 import { io, Socket } from "socket.io-client";
@@ -52,6 +54,39 @@ export async function sendToServer(table_name: string, unique_id: string, type: 
 
 }
 
+export async function getLeftOverMessages(){
+
+  try{
+
+    const messages = await fetch(`${SERVER_LINK}/shared/getLeftOverMessages`, {
+      headers: {
+        cookie: `userId=${Sharing.userId}`
+      }
+    });
+
+    const data = (await messages.json());
+
+    console.log(data);
+
+    for(let i = 0;i < data.length;i++){
+      const [main_data, updateId] = data[i];
+      const { from, message }  = main_data;
+
+      await prepareUpdate(message.type, message.table_name, message.unique_id_parent, message.unique_id_child, message.data);
+    }
+
+    await fetch(`${SERVER_LINK}/shared/deleteLeftOverMessages`, {
+      method: "POST",
+      headers: {
+        cookie: `userId=${Sharing.userId}`
+      }
+    });
+
+  }catch(err){
+    console.log(err);
+  }
+}
+
 export function listenToServer(socket: Socket){
   // TODO:
   // Listen to server
@@ -62,7 +97,7 @@ export function listenToServer(socket: Socket){
 
   socket.on('connect', () => {
     console.log('Connected to server');
-    socket.emit("getLeftOverMessages", "");
+    getLeftOverMessages();
   });
 
   socket.on("message", (message, ackCb) => {
@@ -96,31 +131,36 @@ export async function prepareUpdate(type: string, table_name: string, list_uniqu
   const db = await getDatabase(); 
   const { title, isDone: checked } = data;
   const isDone = (checked == 1 || checked == true);
-  if(table_name == "list_items"){
-    if(type == 'insert'){
-      const list_id = (await db.getFirstAsync("SELECT id FROM lists WHERE unique_id = ?", [list_unique_id]) as any).id;
-      await db.runAsync('INSERT INTO list_items (unique_id, list_id, title, isDone) VALUES (?, ?, ?, ?)', [item_unique_id, list_id, title, isDone]);
-    }else if(type == 'update'){
-      // const list_id = (await db.getFirstAsync("SELECT id FROM lists WHERE unique_id = ?", [list_unique_id]) as any).id;
-      await db.runAsync('UPDATE list_items SET title = ?, isDone = ? WHERE unique_id = ?', [title, isDone, item_unique_id]);
-      emitter.emit('list-item-update-v2', [item_unique_id, title, isDone]);
-    }else if(type == 'delete'){
-      await db.runAsync('DELETE FROM list_items WHERE unique_id = ?', [item_unique_id]);
-    }
-    emitter.emit('list-item-update');
-  } else if(table_name == "lists"){
-    const { title, description, color, tag } = data;
-    if(type == 'delete'){
-      const list_id = (await db.getFirstAsync("SELECT id FROM lists WHERE unique_id = ?", [list_unique_id]) as any).id;
-      await db.runAsync('DELETE FROM list_items WHERE list_id = ?', [list_id]);
-      await db.runAsync('DELETE FROM lists WHERE unique_id = ?', [list_unique_id]);
+  try{
+    if(table_name == "list_items"){
+      if(type == 'insert'){
+        const list_id = (await db.getFirstAsync("SELECT id FROM lists WHERE unique_id = ?", [list_unique_id]) as any).id;
+        await db.runAsync('INSERT INTO list_items (unique_id, list_id, title, isDone) VALUES (?, ?, ?, ?)', [item_unique_id, list_id, title, isDone]);
+      }else if(type == 'update'){
+        await db.runAsync('UPDATE list_items SET title = ?, isDone = ? WHERE unique_id = ?', [title, isDone, item_unique_id]);
+        emitter.emit('list-item-update-v2', [item_unique_id, title, isDone]);
+      }else if(type == 'delete'){
+        await db.runAsync('DELETE FROM list_items WHERE unique_id = ?', [item_unique_id]);
+      }
       emitter.emit('list-item-update');
-    }else if(type == 'update'){
-      await db.runAsync('UPDATE lists SET title = ?, description = ?, color = ?, tag = ? WHERE unique_id = ?', [title, description, color, tag, list_unique_id]);
+    } else if(table_name == "lists"){
+      const { title, description, color, tag } = data;
+      if(type == 'delete'){
+        const list_id = (await db.getFirstAsync("SELECT id FROM lists WHERE unique_id = ?", [list_unique_id]) as any).id;
+        await db.runAsync('DELETE FROM list_items WHERE list_id = ?', [list_id]);
+        await db.runAsync('DELETE FROM lists WHERE unique_id = ?', [list_unique_id]);
+        emitter.emit('list-item-update');
+      }else if(type == 'update'){
+        await db.runAsync('UPDATE lists SET title = ?, description = ?, color = ?, tag = ? WHERE unique_id = ?', [title, description, color, tag, list_unique_id]);
+      }
+  
+      emitter.emit('list-update');
     }
-
-    emitter.emit('list-update');
+  }catch(err){
+    console.log(type, table_name, list_unique_id, data);
+    console.error("error in prepareUpdate", err);
   }
+  
 }
 
 export async function prepareList(data: { [key: string]: any }) {

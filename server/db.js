@@ -42,6 +42,20 @@ export async function addUserToList(ids, listId) {
   }
 }
 
+export async function deleteList(listId) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM lists WHERE listid = $1", [listId]);
+    await client.query("COMMIT");
+  } catch (err) {
+    console.log(err);
+    await client.query("ROLLBACK");
+  } finally {
+    client.release();
+  }
+}
+
 export async function getAllUserIds(listId) {
   const client = await pool.connect();
   try {
@@ -53,6 +67,54 @@ export async function getAllUserIds(listId) {
   } catch (err) {
     console.log(err);
     return [];
+  } finally {
+    client.release();
+  }
+}
+
+export async function addNotAckMessages(listId, type, data, to) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    console.log("adding to updates", to);
+    await client.query(
+      "INSERT INTO updates (listid, to_userid, updatetype, updatedata) VALUES ($1, $2, $3, $4)",
+      [listId, to, type, data]
+    );
+    await client.query("COMMIT");
+  } catch (err) {
+    console.log(err);
+    await client.query("ROLLBACK");
+  } finally {
+    client.release();
+  }
+}
+
+export async function getNotAckMessages(id) {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      "SELECT updatedata, updateid FROM updates WHERE to_userid = $1",
+      [id]
+    );
+    return result.rows.map((row) => [JSON.parse(row.updatedata), row.updateid]);
+  } catch (err) {
+    console.log(err);
+    return [];
+  } finally {
+    client.release();
+  }
+}
+
+export async function deleteNotAckMessages(id) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("DELETE FROM updates WHERE to_userid = $1", [id]);
+    await client.query("COMMIT");
+  } catch (err) {
+    console.log(err);
+    await client.query("ROLLBACK");
   } finally {
     client.release();
   }

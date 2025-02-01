@@ -135,10 +135,14 @@ export const BottomEditSheet = () => {
   }, [isEditSheetOpen]);
 
   async function handleSave() {
-    if (currentList) {
-      await updateList(currentList, title, description, color, emoji);
-    } else await addList(title, description, color, emoji);
-    setEditSheetOpen(false);
+    try {
+      if (currentList) {
+        await updateList(currentList, title, description, color, emoji);
+      } else await addList(title, description, color, emoji);
+      setEditSheetOpen(false);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (

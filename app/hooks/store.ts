@@ -3,6 +3,7 @@ import { emitter, sendToServer } from './emitter';
 import * as Crypto from 'expo-crypto';
 
 import { getDatabase, ListItemsScheme, ListsScheme } from './database';
+import { SERVER_LINK } from '~/constants/Server';
 
 type asUnQ = {
   unique_id: string;
@@ -18,13 +19,17 @@ async function getUniqueId(table: string, id: number): Promise<string> {
 }
 
 export async function initRun(){
-  const db = await getDatabase();
-  await db.execAsync(`
-  PRAGMA journal_mode = WAL;
-  CREATE TABLE IF NOT EXISTS lists (unique_id TEXT, id INTEGER PRIMARY KEY NOT NULL, title TEXT NOT NULL, description TEXT, color TEXT NOT NULL, tag TEXT NOT NULL, createdAt INTEGER NOT NULL);
-  CREATE TABLE IF NOT EXISTS list_items (unique_id TEXT, id INTEGER PRIMARY KEY NOT NULL, list_id INTEGER NOT NULL, title TEXT NOT NULL, isDone BOOLEAN NOT NULL DEFAULT FALSE);
-  CREATE TABLE IF NOT EXISTS collabrating_lists (unique_id TEXT, id INTEGER PRIMARY KEY NOT NULL);
-  `);
+  try{
+    const db = await getDatabase();
+    await db.execAsync(`
+    PRAGMA journal_mode = WAL;
+    CREATE TABLE IF NOT EXISTS lists (unique_id TEXT UNIQUE, id INTEGER PRIMARY KEY NOT NULL, title TEXT NOT NULL, description TEXT, color TEXT NOT NULL, tag TEXT NOT NULL, createdAt INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS list_items (unique_id TEXT UNIQUE, id INTEGER PRIMARY KEY NOT NULL, list_id INTEGER NOT NULL, title TEXT NOT NULL, isDone BOOLEAN NOT NULL DEFAULT FALSE);
+    CREATE TABLE IF NOT EXISTS collabrating_lists (unique_id TEXT, id INTEGER PRIMARY KEY NOT NULL);
+    `);
+  }catch(err){
+    console.log('Error in creating tables', err);
+  }
 }
 
 // Read
@@ -102,8 +107,11 @@ export async function deleteList(id: number){
 
   if(res.changes > 0) sendToServer('lists', unique_id, 'delete', { id });
 
-  emitter.emit('list-update');
+  await fetch(`${SERVER_LINK}/shared/delete/${unique_id}`, {
+    method: "POST",
+  });
 
+  emitter.emit('list-update');
 }
 
 export async function deleteListItem(list_id: number, id: number){

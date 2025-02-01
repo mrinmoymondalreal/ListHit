@@ -234,6 +234,7 @@ export default function Page() {
 
   useEffect(() => {
     emitter.on("list-item-update-v2", (_event) => {
+      console.log(_event);
       getAllListItems(parseInt(id)).then((result) => {
         let res = result.map((e) => ({ ...e, isEditing: false }));
         setData(() => res);

@@ -14,7 +14,7 @@ create table lists(
 create table updates (
   updateId SERIAL primary key,
   listId TEXT,
-  from_userId TEXT,
+  to_userId TEXT,
   created_at timestamp default current_timestamp,
   updateType TEXT,
   updateData TEXT

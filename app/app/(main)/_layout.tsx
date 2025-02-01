@@ -7,6 +7,7 @@ import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
 } from "react-native-reanimated";
+import { Sharing } from "~/constants/Share";
 
 // This is the default configuration
 configureReanimatedLogger({
@@ -20,6 +21,8 @@ export default function RootLayout() {
   if (isLoaded && !isSignedIn) {
     return <Redirect href="/(auth)" />;
   }
+
+  Sharing.userId = userId!;
 
   const socket = initSocket(userId!);
   listenToServer(socket);
