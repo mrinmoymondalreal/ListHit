@@ -15,6 +15,7 @@ import {
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { Button } from "./ui/button";
 import { Text } from "./ui/text";
+import { useIconColor } from "~/constants/Colors";
 
 export default function HeaderView({
   children,
@@ -80,6 +81,8 @@ export default function HeaderView({
 
   const navigation = useNavigation();
 
+  const IconColor = useIconColor();
+
   return (
     <SafeAreaView
       style={{
@@ -120,7 +123,7 @@ export default function HeaderView({
                 size={"icon"}
                 onPress={router.back}
               >
-                <ArrowLeft color={"white"} size={30} />
+                <ArrowLeft color={IconColor} size={30} />
               </Button>
             )}
             <AnimatedText style={[textStylz, { fontWeight: "900" }]}>

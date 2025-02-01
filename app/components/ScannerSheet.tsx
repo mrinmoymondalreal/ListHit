@@ -26,6 +26,7 @@ import { SERVER_LINK } from "~/constants/Server";
 import { useAuth } from "@clerk/clerk-expo";
 import { Sharing } from "~/constants/Share";
 import { getFullList, prepareList } from "~/hooks/emitter";
+import { useIconColor } from "~/constants/Colors";
 
 export const ScannerSheet = () => {
   const sheetRef = useRef<BottomSheet>(null);
@@ -120,6 +121,8 @@ export const ScannerSheet = () => {
     transform: [{ rotate: `${sv.get() * 360} deg` }],
   }));
 
+  const IconColor = useIconColor();
+
   return (
     <GestureHandlerRootView
       style={{
@@ -149,7 +152,7 @@ export const ScannerSheet = () => {
         >
           <AnimatedLoader
             style={loaderStyles}
-            color="white"
+            color={IconColor}
             size={40}
             className="animate-spin"
           />

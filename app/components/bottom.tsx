@@ -25,6 +25,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { COLORS } from "~/lib/constant";
 import { EMOJIS } from "~/lib/constants";
+import { useIconColor } from "~/constants/Colors";
 
 function DeleteButton({ id }: { id: number }) {
   const setClose = useSetAtom(editSheetAtom);
@@ -34,11 +35,13 @@ function DeleteButton({ id }: { id: number }) {
     setClose(false);
   }
 
+  const IconColor = useIconColor();
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant={"secondary"} size={"icon"}>
-          <Trash2Icon color={"white"} />
+          <Trash2Icon color={IconColor} />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="mx-5">

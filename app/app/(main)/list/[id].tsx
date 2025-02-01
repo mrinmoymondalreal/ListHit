@@ -39,6 +39,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { ListItemsScheme } from "~/hooks/database";
 import { emitter } from "~/hooks/emitter";
+import { useIconColor } from "~/constants/Colors";
 
 interface ListItemsType extends ListItemsScheme {
   isEditing: boolean;
@@ -68,12 +69,14 @@ function RightAction({
     };
   });
 
+  const IconColor = useIconColor();
+
   return (
     <Animated.View
       style={[{ justifyContent: "center", paddingRight: 20 }, styleAnimation]}
     >
       <Button variant={"secondary"} size={"icon"} onPress={handleDelete}>
-        <Trash2 color="white" />
+        <Trash2 color={IconColor} />
       </Button>
     </Animated.View>
   );
@@ -258,13 +261,15 @@ export default function Page() {
     ]);
   }
 
+  const IconColor = useIconColor();
+
   return (
     <GestureHandlerRootView>
       <HeaderView
         title={title}
         headerRight={
           <Button onPress={handleAdd} variant={"ghost"} size={"icon"}>
-            <PlusIcon color="white" />
+            <PlusIcon color={IconColor} />
           </Button>
         }
       >

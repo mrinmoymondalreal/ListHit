@@ -49,6 +49,7 @@ import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeabl
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Sharing } from "~/constants/Share";
 import { ShareSheet } from "~/components/ShareSheet";
+import { useIconColor } from "~/constants/Colors";
 
 function RightAction({
   prog,
@@ -74,12 +75,14 @@ function RightAction({
     };
   });
 
+  const IconColor = useIconColor();
+
   return (
     <Animated.View
       style={[{ justifyContent: "center", paddingRight: 20 }, styleAnimation]}
     >
       <Button variant={"secondary"} size={"icon"} onPress={handleShare}>
-        <Share2Icon color="white" />
+        <Share2Icon color={IconColor} />
       </Button>
     </Animated.View>
   );
@@ -112,6 +115,7 @@ function ListItem({ item }: { item: ListsScheme }) {
     setShareSheetOpen(true);
     return;
   }
+  const IconColor = useIconColor();
 
   return (
     <ReanimatedSwipeable
@@ -149,7 +153,7 @@ function ListItem({ item }: { item: ListsScheme }) {
             variant={"secondary"}
             size={"icon"}
           >
-            <ChevronRight size={30} color={"white"} />
+            <ChevronRight size={30} color={IconColor} />
           </Button>
         </View>
       </Pressable>
@@ -177,6 +181,9 @@ export default function Page() {
       emitter.off("list-update");
     };
   }, []);
+
+  const IconColor = useIconColor();
+
   return (
     <GestureHandlerRootView>
       <ShareSheet />
@@ -194,7 +201,7 @@ export default function Page() {
                 className="py-4"
                 onPress={() => setEditSheetOpen(true)}
               >
-                <Plus color={"white"} size={25} />
+                <Plus color={IconColor} size={25} />
               </Button>
               <Button
                 onPress={() => setScannerSheetOpen(true)}
@@ -202,7 +209,7 @@ export default function Page() {
                 size={"icon"}
                 className="py-4"
               >
-                <ScanQrCode color={"white"} size={25} />
+                <ScanQrCode color={IconColor} size={25} />
               </Button>
               <Button
                 onPress={() => setProfileSheetOpen(true)}
@@ -210,7 +217,7 @@ export default function Page() {
                 size={"icon"}
                 className="py-4"
               >
-                <UserCircle2Icon color={"white"} size={25} />
+                <UserCircle2Icon color={IconColor} size={25} />
               </Button>
             </View>
           }

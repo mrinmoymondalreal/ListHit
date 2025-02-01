@@ -1,1 +1,1 @@
-export const SERVER_LINK = "http://192.168.0.103:3000";
+export const SERVER_LINK = process.env.EXPO_PUBLIC_SERVER_LINK;
