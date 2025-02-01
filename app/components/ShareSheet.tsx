@@ -6,7 +6,7 @@ import { useAtom } from "jotai";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { Text } from "./ui/text";
 import { Button } from "./ui/button";
-import { Share, ToastAndroid, View } from "react-native";
+import { BackHandler, Share, ToastAndroid, View } from "react-native";
 import { shareSheetAtom } from "~/lib/hooks";
 import * as Clipboard from "expo-clipboard";
 import QRCode from "react-native-qrcode-svg";
@@ -34,6 +34,21 @@ export const ShareSheet = () => {
     } else {
       sheetRef.current?.close();
     }
+
+    const handleBackPress = () => {
+      if (isOpen) {
+        sheetRef.current?.close();
+        return true; // Prevent default back action
+      }
+      return false; // Allow default back action
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => backHandler.remove();
   }, [isOpen]);
 
   async function handleCopy() {
@@ -57,7 +72,10 @@ export const ShareSheet = () => {
     <GestureHandlerRootView
       style={{
         position: "absolute",
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        backgroundColor:
+          useColorScheme() == "dark"
+            ? "rgba(255, 255, 255, 0.2)"
+            : "rgba(0, 0, 0, 0.2)",
         display: isOpen ? "flex" : "none",
         top: useSafeAreaInsets().top,
         left: 0,
@@ -81,7 +99,7 @@ export const ShareSheet = () => {
           backgroundColor: useColorScheme() == "dark" ? "black" : "white",
         }}
         handleIndicatorStyle={{
-          backgroundColor: useColorScheme() == "dark" ? "white" : "",
+          backgroundColor: useColorScheme() == "dark" ? "white" : "black",
         }}
       >
         <BottomSheetView

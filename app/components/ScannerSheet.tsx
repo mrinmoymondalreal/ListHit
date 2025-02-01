@@ -6,7 +6,7 @@ import { useAtom } from "jotai";
 import { useColorScheme } from "~/hooks/useColorScheme";
 import { Text } from "./ui/text";
 import { Button } from "./ui/button";
-import { StyleSheet, View } from "react-native";
+import { BackHandler, StyleSheet, View } from "react-native";
 import { scannerSheetAtom } from "~/lib/hooks";
 import { Input } from "./ui/input";
 
@@ -52,6 +52,21 @@ export const ScannerSheet = () => {
       sheetRef.current?.close();
       setCameraActive(false);
     }
+
+    const handleBackPress = () => {
+      if (isOpen) {
+        sheetRef.current?.close();
+        return true; // Prevent default back action
+      }
+      return false; // Allow default back action
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => backHandler.remove();
   }, [isOpen]);
 
   async function handlePostCode(uniqueId: string, fromUserId: string) {
@@ -127,7 +142,10 @@ export const ScannerSheet = () => {
     <GestureHandlerRootView
       style={{
         position: "absolute",
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        backgroundColor:
+          useColorScheme() == "dark"
+            ? "rgba(255, 255, 255, 0.2)"
+            : "rgba(0, 0, 0, 0.2)",
         display: isOpen ? "flex" : "none",
         top: useSafeAreaInsets().top,
         left: 0,
@@ -173,7 +191,7 @@ export const ScannerSheet = () => {
           backgroundColor: useColorScheme() == "dark" ? "black" : "white",
         }}
         handleIndicatorStyle={{
-          backgroundColor: useColorScheme() == "dark" ? "white" : "",
+          backgroundColor: useColorScheme() == "dark" ? "white" : "black",
         }}
       >
         <BottomSheetView
@@ -230,6 +248,7 @@ export const ScannerSheet = () => {
           </View>
           <View>
             <Input
+              asSheet
               placeholder="Enter code"
               value={code}
               onChangeText={setCode}

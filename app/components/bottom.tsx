@@ -10,7 +10,14 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { addList, deleteList, getListDetail, updateList } from "~/hooks/store";
-import { ColorValue, Dimensions, Modal, Pressable, View } from "react-native";
+import {
+  BackHandler,
+  ColorValue,
+  Dimensions,
+  Modal,
+  Pressable,
+  View,
+} from "react-native";
 import { Trash2Icon } from "lucide-react-native";
 import {
   AlertDialog,
@@ -135,6 +142,21 @@ export const BottomEditSheet = () => {
       setTitle("");
       setDescription("");
     }
+
+    const handleBackPress = () => {
+      if (isEditSheetOpen) {
+        sheetRef.current?.close();
+        return true; // Prevent default back action
+      }
+      return false; // Allow default back action
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => backHandler.remove();
   }, [isEditSheetOpen]);
 
   async function handleSave() {
@@ -152,7 +174,10 @@ export const BottomEditSheet = () => {
     <GestureHandlerRootView
       style={{
         position: "absolute",
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        backgroundColor:
+          useColorScheme() == "dark"
+            ? "rgba(255, 255, 255, 0.2)"
+            : "rgba(0, 0, 0, 0.2)",
         display: isEditSheetOpen ? "flex" : "none",
         top: useSafeAreaInsets().top,
         left: 0,
@@ -288,7 +313,7 @@ export const BottomEditSheet = () => {
           backgroundColor: useColorScheme() == "dark" ? "black" : "white",
         }}
         handleIndicatorStyle={{
-          backgroundColor: useColorScheme() == "dark" ? "white" : "",
+          backgroundColor: useColorScheme() == "dark" ? "white" : "black",
         }}
       >
         <BottomSheetView
@@ -315,18 +340,20 @@ export const BottomEditSheet = () => {
               <ColorSelector color={color} />
             </Button>
             <Button variant={"secondary"} onPress={() => setSelectEmoji(true)}>
-              <Text>{emoji}</Text>
+              <Text style={{ fontSize: 20 }}>{emoji}</Text>
             </Button>
           </View>
           <Input
+            asSheet
             placeholder={`Enter List Name`}
-            className="border-white/40 native:h-16"
+            className="dark:border-white/40 native:h-16"
             value={title}
             onChangeText={(text) => setTitle(text)}
           />
           <Textarea
+            asSheet
             placeholder={`Enter Description`}
-            className="border-white/40 py-4"
+            className="dark:border-white/40 py-4"
             value={description}
             onChangeText={(text) => setDescription(text)}
           />

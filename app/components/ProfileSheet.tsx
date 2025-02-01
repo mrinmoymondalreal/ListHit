@@ -8,7 +8,7 @@ import { Text } from "./ui/text";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
-import { View } from "react-native";
+import { BackHandler, View } from "react-native";
 import { profileSheetAtom } from "~/lib/hooks";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 
@@ -28,13 +28,31 @@ export const ProfileSheet = () => {
     } else {
       sheetRef.current?.close();
     }
+
+    const handleBackPress = () => {
+      if (isOpen) {
+        sheetRef.current?.close();
+        return true; // Prevent default back action
+      }
+      return false; // Allow default back action
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => backHandler.remove();
   }, [isOpen]);
 
   return (
     <GestureHandlerRootView
       style={{
         position: "absolute",
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        backgroundColor:
+          useColorScheme() == "dark"
+            ? "rgba(255, 255, 255, 0.2)"
+            : "rgba(0, 0, 0, 0.2)",
         display: isOpen ? "flex" : "none",
         top: useSafeAreaInsets().top,
         left: 0,
@@ -58,7 +76,7 @@ export const ProfileSheet = () => {
           backgroundColor: useColorScheme() == "dark" ? "black" : "white",
         }}
         handleIndicatorStyle={{
-          backgroundColor: useColorScheme() == "dark" ? "white" : "",
+          backgroundColor: useColorScheme() == "dark" ? "white" : "black",
         }}
       >
         <BottomSheetView
