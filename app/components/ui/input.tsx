@@ -6,7 +6,7 @@ import { cn } from "~/lib/utils";
 const Input = React.forwardRef<
   React.ElementRef<typeof TextInput | typeof BottomSheetTextInput>,
   TextInputProps & { asSheet?: boolean }
->(({ className, placeholderClassName, asSheet = true, ...props }, ref) => {
+>(({ className, placeholderClassName, asSheet, ...props }, ref) => {
   const Input = asSheet ? BottomSheetTextInput : TextInput;
   return (
     <Input
